@@ -13,7 +13,7 @@ import { Sparkles, RotateCcw, Users, Settings, LayoutGrid, Globe, Github, Heart,
 function AppContent() {
   const { generate, reset, isGenerating, guests, result } = useAppStore();
   const { t, locale, setLocale } = useI18n();
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
 
   const toggleLocale = () => {
     setLocale(locale === 'fr' ? 'en' : 'fr');
@@ -21,7 +21,7 @@ function AppContent() {
 
   const cycleTheme = () => {
     const themes: ('light' | 'dark' | 'system')[] = ['light', 'dark', 'system'];
-    const currentIndex = themes.indexOf(theme);
+    const currentIndex = theme ? themes.indexOf(theme) : 0;
     const nextIndex = (currentIndex + 1) % themes.length;
     setTheme(themes[nextIndex]);
   };

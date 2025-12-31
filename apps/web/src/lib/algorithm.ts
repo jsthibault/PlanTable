@@ -134,7 +134,7 @@ export function validateConfiguration(input: AlgorithmInput): ValidationResult {
   });
 
   // 5. Calculer le nombre de tables nécessaires
-  const regularGuests = guests.filter(
+  const _regularGuests = guests.filter(
     (g) => !honorTableWithPartners.has(g.id)
   );
   // Note: Le nombre de tables est maintenant configuré manuellement
@@ -692,7 +692,7 @@ function findSuitableTableWithDebug(
   exclusions: ExclusionConstraint[],
   seatsPerTable: number,
   warnings: Warning[],
-  allGuests: Guest[],
+  _allGuests: Guest[],
   debug: DebugLogger
 ): Table | null {
   // Ignorer la table d'honneur (index 0)
@@ -818,7 +818,7 @@ function findSuitableTableWithFamilyPreference(
 /**
  * Trouve une table appropriée pour un groupe d'invités
  */
-function findSuitableTable(
+function _findSuitableTable(
   tables: Table[],
   guestsToPlace: Guest[],
   exclusions: ExclusionConstraint[],

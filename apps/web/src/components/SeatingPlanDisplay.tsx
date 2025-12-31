@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAppStore } from '@/store';
 import { useI18n } from '@/lib/i18n';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +25,7 @@ import { Crown, Users, AlertTriangle, GripVertical, Heart, Pencil, Check, X, Bug
 import type { Guest, Table } from '@/types';
 
 export function SeatingPlanDisplay() {
-  const { result, viewMode, setViewMode, moveGuestToTable, couples, planNeedsRegeneration, generate, exclusions, guests, configuration } = useAppStore();
+  const { result, viewMode, setViewMode, moveGuestToTable, couples, planNeedsRegeneration, generate, exclusions, configuration } = useAppStore();
   const { locale } = useI18n();
   const [activeGuest, setActiveGuest] = useState<Guest | null>(null);
   const [showDebug, setShowDebug] = useState(false);
