@@ -21,9 +21,10 @@ function AppContent() {
 
   const cycleTheme = () => {
     const themes: ('light' | 'dark' | 'system')[] = ['light', 'dark', 'system'];
-    const currentIndex = theme ? themes.indexOf(theme) : 0;
+    const currentTheme = theme ?? 'system';
+    const currentIndex = themes.indexOf(currentTheme);
     const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
+    setTheme(themes[nextIndex]!);
   };
 
   const getThemeIcon = () => {

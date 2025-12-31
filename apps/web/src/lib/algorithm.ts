@@ -133,10 +133,6 @@ export function validateConfiguration(input: AlgorithmInput): ValidationResult {
     }
   });
 
-  // 5. Calculer le nombre de tables nécessaires
-  const _regularGuests = guests.filter(
-    (g) => !honorTableWithPartners.has(g.id)
-  );
   // Note: Le nombre de tables est maintenant configuré manuellement
 
   // 6. Vérifier que les groupes (couples + exclusions) peuvent tenir
@@ -813,72 +809,6 @@ function findSuitableTableWithFamilyPreference(
   
   // Sinon, utiliser la logique standard
   return findSuitableTableWithDebug(tables, guestsToPlace, exclusions, seatsPerTable, warnings, allGuests, debug);
-}
-
-/**
- * Trouve une table appropriée pour un groupe d'invités
- */
-function _findSuitableTable(
-  tables: Table[],
-  guestsToPlace: Guest[],
-  exclusions: ExclusionConstraint[],
-  seatsPerTable: number,
-  warnings: Warning[],
-  _allGuests: Guest[]
-): Table | null {
-  // Ignorer la table d'honneur (index 0)
-  for (let i = 1; i < tables.length; i++) {
-    const table = tables[i];
-    if (!table) continue;
-    
-    // Vérifier la capacité
-    if (table.guests.length + guestsToPlace.length > seatsPerTable) {
-      continue;
-    }
-
-    // Vérifier les exclusions
-    let hasExclusion = false;
-
-    for (const newGuest of guestsToPlace) {
-      for (const existingGuest of table.guests) {
-        if (haveExclusion(newGuest, existingGuest, exclusions)) {
-          hasExclusion = true;
-          // On va essayer de trouver une autre table
-          break;
-        }
-      }
-      if (hasExclusion) break;
-    }
-
-    if (!hasExclusion) {
-      return table;
-    }
-  }
-
-  // Si aucune table sans exclusion n'est trouvée, on applique le mode "best effort"
-  // On cherche une table avec de la place et on ajoute un warning
-  for (let i = 1; i < tables.length; i++) {
-    const table = tables[i];
-    if (!table) continue;
-    
-    if (table.guests.length + guestsToPlace.length <= seatsPerTable) {
-      // Ajouter des warnings pour les exclusions violées
-      for (const newGuest of guestsToPlace) {
-        for (const existingGuest of table.guests) {
-          if (haveExclusion(newGuest, existingGuest, exclusions)) {
-            warnings.push({
-              type: 'exclusion_violated',
-              message: `${getFullName(newGuest)} et ${getFullName(existingGuest)} sont à la même table malgré l'exclusion.`,
-              guestIds: [newGuest.id, existingGuest.id],
-            });
-          }
-        }
-      }
-      return table;
-    }
-  }
-
-  return null; // Créer une nouvelle table
 }
 
 /**
