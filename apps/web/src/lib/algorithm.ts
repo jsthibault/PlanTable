@@ -640,8 +640,8 @@ function sortGuests(
     
     // 2. Par rôle (témoins en premier - mais ils sont déjà à la table d'honneur)
     if (config.sortingCriteria.byRole) {
-      const roleOrder = { married: 0, witness: 1, regular: 2 };
-      const roleCompare = roleOrder[a.role] - roleOrder[b.role];
+      const roleOrder: Record<string, number> = { married: 0, witness: 1, bridesmaid: 2, groomsman: 2, regular: 3 };
+      const roleCompare = (roleOrder[a.role] ?? 3) - (roleOrder[b.role] ?? 3);
       if (roleCompare !== 0) return roleCompare;
     }
 
