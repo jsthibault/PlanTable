@@ -106,7 +106,6 @@ export interface SeatingPlanResult {
   errors: string[];
   debugLog?: string | undefined; // Log de debug optionnel
 }
-}
 
 // ============================================
 // ALGORITHM INPUT

@@ -4,10 +4,6 @@
 
 ## 📋 Project Summary
 
-> [!NOTE]
-> This application was originally "vibe coded" and enhanced with my limited front-end engineering knowledge.
-> A more thorough review is in progress
-
 **PlanTable** is a SPA (Single Page Application) web app for creating wedding seating charts. It automatically handles guest placement while respecting hard constraints (inseparable couples, exclusions) and soft constraints (family grouping, age).
 
 ---
