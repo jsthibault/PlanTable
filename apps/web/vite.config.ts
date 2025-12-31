@@ -5,7 +5,7 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/PlanTable/', // For GitHub Pages - change to '/' for custom domain
+  base: '/', // Use '/' for custom domain, '/PlanTable/' for github.io
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
