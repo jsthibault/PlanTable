@@ -9,6 +9,7 @@ import { ExportActions } from '@/components/ExportActions';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sparkles, RotateCcw, Users, Settings, LayoutGrid, Globe, Github, Heart, Sun, Moon, Monitor } from 'lucide-react';
+import logoImg from '/logo.png';
 
 function AppContent() {
   const { generate, reset, isGenerating, guests, result } = useAppStore();
@@ -46,7 +47,7 @@ function AppContent() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="PlanTable" className="h-14 w-14 rounded-xl" />
+              <img src={logoImg} alt="PlanTable" className="h-14 w-14 rounded-xl" />
               <div>
                 <h1 className="text-xl font-bold">{t('appTitle')}</h1>
                 <p className="text-sm text-muted-foreground">
