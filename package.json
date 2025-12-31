@@ -1,0 +1,12 @@
+{
+  "name": "plantable",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "cd apps/web && npm run dev",
+    "build": "cd apps/web && npm run build",
+    "preview": "cd apps/web && npm run preview",
+    "lint": "cd apps/web && npm run lint"
+  }
+}
