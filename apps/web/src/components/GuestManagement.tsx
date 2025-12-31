@@ -156,11 +156,15 @@ export function GuestManagement() {
     ? {
         married: '💍 Marié(e)',
         witness: '⭐ Témoin',
+        bridesmaid: '👗 Demoiselle d\'honneur',
+        groomsman: '🤵 Garçon d\'honneur',
         regular: '👤 Invité',
       }
     : {
         married: '💍 Married',
         witness: '⭐ Witness',
+        bridesmaid: '👗 Bridesmaid',
+        groomsman: '🤵 Groomsman',
         regular: '👤 Guest',
       };
 
@@ -250,6 +254,8 @@ export function GuestManagement() {
                   <SelectContent>
                     <SelectItem value="regular">{roleLabels.regular}</SelectItem>
                     <SelectItem value="witness">{roleLabels.witness}</SelectItem>
+                    <SelectItem value="bridesmaid">{roleLabels.bridesmaid}</SelectItem>
+                    <SelectItem value="groomsman">{roleLabels.groomsman}</SelectItem>
                     <SelectItem value="married">{roleLabels.married}</SelectItem>
                   </SelectContent>
                 </Select>
@@ -482,6 +488,8 @@ function GuestRow({
             <SelectContent>
               <SelectItem value="regular">{roleLabels.regular}</SelectItem>
               <SelectItem value="witness">{roleLabels.witness}</SelectItem>
+              <SelectItem value="bridesmaid">{roleLabels.bridesmaid}</SelectItem>
+              <SelectItem value="groomsman">{roleLabels.groomsman}</SelectItem>
               <SelectItem value="married">{roleLabels.married}</SelectItem>
             </SelectContent>
           </Select>

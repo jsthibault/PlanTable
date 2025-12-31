@@ -5,7 +5,7 @@
 /**
  * Rôle spécial d'un invité (pour la table d'honneur)
  */
-export type GuestRole = 'married' | 'witness' | 'regular';
+export type GuestRole = 'married' | 'witness' | 'bridesmaid' | 'groomsman' | 'regular';
 
 /**
  * Invité individuel avec tous ses attributs

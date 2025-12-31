@@ -74,11 +74,15 @@ function generateHTMLForPDF(
     ? {
         married: '💍 Marié(e)',
         witness: '⭐ Témoin',
+        bridesmaid: '👗 Demoiselle d\'honneur',
+        groomsman: '🤵 Garçon d\'honneur',
         regular: 'Invité',
       }
     : {
         married: '💍 Married',
         witness: '⭐ Witness',
+        bridesmaid: '👗 Bridesmaid',
+        groomsman: '🤵 Groomsman',
         regular: 'Guest',
       };
 

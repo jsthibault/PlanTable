@@ -540,6 +540,8 @@ function DraggableGuest({ guest, isInCouple, locale }: DraggableGuestProps) {
   const roleColors: Record<string, string> = {
     married: 'text-pink-600 dark:text-pink-400',
     witness: 'text-yellow-600 dark:text-yellow-400',
+    bridesmaid: 'text-purple-600 dark:text-purple-400',
+    groomsman: 'text-blue-600 dark:text-blue-400',
     regular: '',
   };
 
@@ -851,6 +853,14 @@ function VisualTableView({ tables, isInCouple, locale }: VisualTableViewProps) {
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded-full bg-yellow-100 border-2 border-yellow-400" />
           <span>{locale === 'fr' ? 'Témoin' : 'Witness'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-full bg-purple-100 border-2 border-purple-400" />
+          <span>{locale === 'fr' ? 'Demoiselle d\'honneur' : 'Bridesmaid'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 rounded-full bg-blue-100 border-2 border-blue-400" />
+          <span>{locale === 'fr' ? 'Garçon d\'honneur' : 'Groomsman'}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded-full bg-white border-2 border-gray-300" />
