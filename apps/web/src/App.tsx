@@ -6,6 +6,7 @@ import { ConfigurationPanel } from '@/components/ConfigurationPanel';
 import { GuestManagement } from '@/components/GuestManagement';
 import { SeatingPlanDisplay } from '@/components/SeatingPlanDisplay';
 import { ExportActions } from '@/components/ExportActions';
+import { CookieConsent, CookieSettingsButton } from '@/components/CookieConsent';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Sparkles, RotateCcw, Users, Settings, LayoutGrid, Globe, Github, Heart, Sun, Moon, Monitor } from 'lucide-react';
@@ -122,10 +123,10 @@ function AppContent() {
 
           <TabsContent value="config" className="space-y-6">
             <ConfigurationPanel />
-            
+
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-4">
-                {locale === 'fr' 
+                {locale === 'fr'
                   ? "Une fois la configuration terminée, ajoutez vos invités dans l'onglet suivant."
                   : "Once configuration is complete, add your guests in the next tab."}
               </p>
@@ -146,19 +147,19 @@ function AppContent() {
                 className="gap-2"
               >
                 <Sparkles className="h-5 w-5" />
-                {isGenerating 
+                {isGenerating
                   ? t('generating')
                   : t('generatePlan')}
               </Button>
-              
+
               {guests.length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  {locale === 'fr' 
+                  {locale === 'fr'
                     ? 'Ajoutez des invités pour générer le plan'
                     : 'Add guests to generate the plan'}
                 </p>
               )}
-              
+
               {guests.length > 0 && !result && (
                 <p className="text-sm text-muted-foreground">
                   {locale === 'fr'
@@ -191,12 +192,13 @@ function AppContent() {
                 <Heart className="h-3 w-3" />
                 {locale === 'fr' ? 'Vous voulez plus d\'outils 100% gratuits pour votre mariage ? Soutenez-moi !' : 'Want more 100% free wedding tools? Support me!'}
               </a>
-              <a 
-                href="mailto:garry.factory@gmail.com" 
+              <a
+                href="mailto:garry.factory@gmail.com"
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 {locale === 'fr' ? 'Créé par' : 'Created by'} garry.factory@gmail.com
               </a>
+              <CookieSettingsButton />
             </div>
           </div>
         </div>
@@ -210,6 +212,7 @@ function App() {
     <ThemeProvider>
       <I18nProvider>
         <AppContent />
+        <CookieConsent />
       </I18nProvider>
     </ThemeProvider>
   );
