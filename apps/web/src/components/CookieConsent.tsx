@@ -3,7 +3,7 @@ import { useI18n } from '@/lib/i18n';
 import { Button } from '@/components/ui/button';
 import { Cookie, Shield, X, Settings } from 'lucide-react';
 
-const GA4_ID = 'G-X4JR4EESF2';
+const GA4_ID = 'G-34Z0FZ60BJ';
 const CONSENT_KEY = 'plantable_cookie_consent';
 
 // Event for reopening the consent dialog
@@ -17,12 +17,12 @@ declare global {
     }
 }
 
-let ga4Loaded = false;
+let analyticsLoaded = false;
 
-function loadGA4() {
+function loadAnalytics() {
     // Only load if not already loaded
-    if (ga4Loaded) return;
-    ga4Loaded = true;
+    if (analyticsLoaded) return;
+    analyticsLoaded = true;
 
     // Initialize dataLayer
     window.dataLayer = window.dataLayer || [];
@@ -42,8 +42,8 @@ function loadGA4() {
     document.head.appendChild(script);
 }
 
-function removeGA4() {
-    // Remove GA4 scripts
+function removeAnalytics() {
+    // Remove GA scripts
     const scripts = document.querySelectorAll(`script[src*="googletagmanager.com"]`);
     scripts.forEach(script => script.remove());
 
@@ -51,7 +51,7 @@ function removeGA4() {
     window.dataLayer = [];
     // @ts-ignore
     delete window.gtag;
-    ga4Loaded = false;
+    analyticsLoaded = false;
 
     // Clear GA cookies
     const cookies = document.cookie.split(';');
@@ -71,10 +71,10 @@ export function CookieConsent() {
     useEffect(() => {
         const savedConsent = localStorage.getItem(CONSENT_KEY);
         if (savedConsent === 'accepted') {
-            loadGA4();
+            loadAnalytics();
             setShowBanner(false);
         } else if (savedConsent === 'refused') {
-            removeGA4();
+            removeAnalytics();
             setShowBanner(false);
         } else {
             setShowBanner(true);
@@ -89,13 +89,13 @@ export function CookieConsent() {
     const handleAccept = () => {
         localStorage.setItem(CONSENT_KEY, 'accepted');
         setShowBanner(false);
-        loadGA4();
+        loadAnalytics();
     };
 
     const handleRefuse = () => {
         localStorage.setItem(CONSENT_KEY, 'refused');
         setShowBanner(false);
-        removeGA4();
+        removeAnalytics();
     };
 
     if (!showBanner) return null;
