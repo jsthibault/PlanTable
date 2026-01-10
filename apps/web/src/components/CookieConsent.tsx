@@ -9,14 +9,6 @@ const CONSENT_KEY = 'plantable_cookie_consent';
 // Event for reopening the consent dialog
 const reopenConsentEvent = new CustomEvent('reopenCookieConsent');
 
-// Declare gtag function for TypeScript
-declare global {
-    interface Window {
-        dataLayer: any[];
-        gtag: (...args: any[]) => void;
-    }
-}
-
 let analyticsLoaded = false;
 
 function loadAnalytics() {
@@ -24,21 +16,38 @@ function loadAnalytics() {
     if (analyticsLoaded) return;
     analyticsLoaded = true;
 
-    // Initialize dataLayer
-    window.dataLayer = window.dataLayer || [];
-
-    // Define gtag function
-    window.gtag = function gtag(...args: any[]) {
-        window.dataLayer.push(args);
-    };
-
-    window.gtag('js', new Date());
-    window.gtag('config', GA4_ID);
-
-    // Load the gtag.js script
+    // Load the gtag.js script FIRST (exactly like Google recommends)
     const script = document.createElement('script');
     script.async = true;
     script.src = `https://www.googletagmanager.com/gtag/js?id=${GA4_ID}`;
+
+    // Only initialize after script loads
+    script.onload = () => {
+        // Initialize dataLayer
+        window.dataLayer = window.dataLayer || [];
+
+        // Define gtag function exactly like Google's code
+        function gtag(..._args: any[]) {
+            window.dataLayer.push(arguments);
+        }
+
+        // Make gtag globally available
+        (window as any).gtag = gtag;
+
+        // Initialize GA4
+        gtag('js', new Date());
+        gtag('config', GA4_ID, {
+            'debug_mode': true // Enable debug mode to see events in DebugView
+        });
+
+        console.log('[GA4] Analytics loaded successfully with ID:', GA4_ID);
+    };
+
+    script.onerror = () => {
+        console.error('[GA4] Failed to load analytics script');
+        analyticsLoaded = false;
+    };
+
     document.head.appendChild(script);
 }
 
@@ -48,9 +57,10 @@ function removeAnalytics() {
     scripts.forEach(script => script.remove());
 
     // Clear dataLayer and gtag
-    window.dataLayer = [];
-    // @ts-ignore
-    delete window.gtag;
+    if (typeof window !== 'undefined') {
+        (window as any).dataLayer = [];
+        delete (window as any).gtag;
+    }
     analyticsLoaded = false;
 
     // Clear GA cookies
@@ -180,4 +190,12 @@ export function CookieSettingsButton() {
             {locale === 'fr' ? 'Cookies' : 'Cookies'}
         </button>
     );
+}
+
+// Declare global types
+declare global {
+    interface Window {
+        dataLayer: any[];
+        gtag: (...args: any[]) => void;
+    }
 }

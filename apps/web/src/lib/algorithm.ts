@@ -231,19 +231,19 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
   const tables: Table[] = [];
   const debug = new DebugLogger();
 
-  debug.section('DÉBUT DE LA GÉNÉRATION');
-  debug.log(`Nombre d'invités: ${guests.length}`);
-  debug.log(`Nombre de couples: ${couples.length}`);
-  debug.log(`Nombre d'exclusions: ${exclusions.length}`);
-  debug.log(`Configuration: ${configuration.numberOfTables} tables de ${configuration.seatsPerTable} places + table d'honneur (${configuration.honorTableSeats} places)`);
+  debug.section('GENERATION START');
+  debug.log(`Number of guests: ${guests.length}`);
+  debug.log(`Number of couples: ${couples.length}`);
+  debug.log(`Number of exclusions: ${exclusions.length}`);
+  debug.log(`Configuration: ${configuration.numberOfTables} tables of ${configuration.seatsPerTable} seats + honor table (${configuration.honorTableSeats} seats)`);
 
   // Lister toutes les exclusions
   if (exclusions.length > 0) {
-    debug.section('EXCLUSIONS DÉFINIES');
+    debug.section('DEFINED EXCLUSIONS');
     exclusions.forEach((e, i) => {
       const guestA = guests.find(g => g.id === e.guestAId);
       const guestB = guests.find(g => g.id === e.guestBId);
-      debug.log(`${i + 1}. "${guestA?.firstName ?? 'Inconnu'} ${guestA?.lastName ?? ''}" <-> "${guestB?.firstName ?? 'Inconnu'} ${guestB?.lastName ?? ''}"`);
+      debug.log(`${i + 1}. "${guestA?.firstName ?? 'Unknown'} ${guestA?.lastName ?? ''}" <-> "${guestB?.firstName ?? 'Unknown'} ${guestB?.lastName ?? ''}"`);
       debug.log(`   IDs: ${e.guestAId} <-> ${e.guestBId}`);
     });
   }
@@ -252,7 +252,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
   debug.section('VALIDATION');
   const validation = validateConfiguration(input);
   if (!validation.isValid) {
-    debug.log(`ÉCHEC: ${validation.errors.join(', ')}`);
+    debug.log(`FAILED: ${validation.errors.join(', ')}`);
     return {
       success: false,
       tables: [],
@@ -264,7 +264,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
   debug.log('Validation OK');
 
   // 2. Créer la table d'honneur
-  debug.section('CRÉATION DES TABLES');
+  debug.section('TABLE CREATION');
   const honorTable: Table = {
     id: generateId(),
     number: 1,
@@ -273,7 +273,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
     capacity: configuration.honorTableSeats,
   };
   tables.push(honorTable);
-  debug.log(`Table d'honneur créée (ID: ${honorTable.id}, capacité: ${honorTable.capacity})`);
+  debug.log(`Honor table created (ID: ${honorTable.id}, capacity: ${honorTable.capacity})`);
 
   // 2b. Pré-créer les tables selon la configuration
   for (let i = 0; i < configuration.numberOfTables; i++) {
@@ -285,11 +285,11 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
       capacity: configuration.seatsPerTable,
     };
     tables.push(table);
-    debug.log(`Table ${i + 2} créée (ID: ${table.id}, capacité: ${table.capacity})`);
+    debug.log(`Table ${i + 2} created (ID: ${table.id}, capacity: ${table.capacity})`);
   }
 
   // 3. Identifier les invités de la table d'honneur (mariés, témoins + conjoints)
-  debug.section('TABLE D\'HONNEUR');
+  debug.section('HONOR TABLE');
   const honorTableGuestIds = new Set<string>();
   const honorGuests = guests.filter(
     (g) => g.role === 'married' || g.role === 'witness'
@@ -297,11 +297,11 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
 
   honorGuests.forEach((g) => {
     honorTableGuestIds.add(g.id);
-    debug.log(`Ajout à table d'honneur: ${g.firstName} ${g.lastName ?? ''} (${g.role})`);
+    debug.log(`Adding to honor table: ${g.firstName} ${g.lastName ?? ''} (${g.role})`);
     const partner = getCouplePartner(g, couples, guests);
     if (partner) {
       honorTableGuestIds.add(partner.id);
-      debug.log(`  + son partenaire: ${partner.firstName} ${partner.lastName ?? ''}`);
+      debug.log(`  + partner: ${partner.firstName} ${partner.lastName ?? ''}`);
     }
   });
 
@@ -311,12 +311,12 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
     .forEach((g) => {
       honorTable.guests.push(g);
     });
-  debug.log(`Total table d'honneur: ${honorTable.guests.length} personnes`);
+  debug.log(`Honor table total: ${honorTable.guests.length} guests`);
 
-  // 4. Préparer les invités restants
-  debug.section('PLACEMENT DES AUTRES INVITÉS');
+  // 4. Prepare remaining guests
+  debug.section('PLACING OTHER GUESTS');
   let remainingGuests = guests.filter((g) => !honorTableGuestIds.has(g.id));
-  debug.log(`Invités restants à placer: ${remainingGuests.length}`);
+  debug.log(`Remaining guests to place: ${remainingGuests.length}`);
 
   // 5. Trier selon les critères (avec exclusions en priorité, auto-générés en dernier)
   remainingGuests = sortGuests(remainingGuests, configuration, couples, exclusions);
@@ -330,11 +330,11 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
     !isAutoGeneratedGuest(g) && !guestsWithConstraints.includes(g)
   );
 
-  debug.log(`Ordre de placement:`);
-  debug.log(`  1. Invités avec exclusions: ${guestsWithConstraints.length}`);
+  debug.log(`Placement order:`);
+  debug.log(`  1. Guests with exclusions: ${guestsWithConstraints.length}`);
   guestsWithConstraints.forEach(g => debug.log(`     - ${g.firstName} ${g.lastName ?? ''}`));
-  debug.log(`  2. Autres invités réels: ${realGuests.length}`);
-  debug.log(`  3. Invités auto-générés: ${autoGenerated.length}`);
+  debug.log(`  2. Other real guests: ${realGuests.length}`);
+  debug.log(`  3. Auto-generated guests: ${autoGenerated.length}`);
 
   // 6. Grouper par famille si le critère est actif
   // LOGIQUE DE PLACEMENT:
@@ -412,13 +412,13 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
     // Reconstruire la liste : familles groupées (grandes d'abord) puis auto-générés
     orderedGuests = [...sortedFamilyGroups.flat(), ...autoGeneratedAll];
 
-    debug.log(`Groupes de famille étendus (avec conjoints, triés par taille):`);
+    debug.log(`Extended family groups (with partners, sorted by size):`);
     sortedFamilyGroups.forEach((group, i) => {
-      const familyName = group[0]?.lastName?.trim() ?? 'Sans nom';
+      const familyName = group[0]?.lastName?.trim() ?? 'No name';
       const hasExclusion = group.some(g => exclusions.some(e => e.guestAId === g.id || e.guestBId === g.id));
       const members = group.map(g => `${g.firstName} ${g.lastName ?? ''}`.trim()).join(', ');
-      debug.log(`  ${i + 1}. ${familyName} (${group.length} pers.)${hasExclusion ? ' ⚠ a des exclusions' : ''}`);
-      debug.log(`     Membres: ${members}`);
+      debug.log(`  ${i + 1}. ${familyName} (${group.length} pers.)${hasExclusion ? ' ⚠ has exclusions' : ''}`);
+      debug.log(`     Members: ${members}`);
     });
   } else {
     // Sans regroupement par famille, on trie juste : vrais invités d'abord, auto-générés ensuite
@@ -435,7 +435,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
     });
 
     orderedGuests = [...realGuestsAll, ...autoGeneratedAll];
-    debug.log(`Pas de regroupement par famille`);
+    debug.log(`No family grouping`);
   }
 
   // 7. Placer les invités table par table
@@ -454,18 +454,18 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
       ? [guest, partner]
       : [guest];
 
-    debug.log(`\nRecherche table pour: ${guestsToPlace.map(g => `${g.firstName} ${g.lastName ?? ''}`).join(' + ')}`);
+    debug.log(`\nFinding table for: ${guestsToPlace.map(g => `${g.firstName} ${g.lastName ?? ''}`).join(' + ')}`);
 
-    // Vérifier les exclusions de ces invités
+    // Check exclusions for these guests
     const guestExclusions = exclusions.filter(e =>
       guestsToPlace.some(g => e.guestAId === g.id || e.guestBId === g.id)
     );
     if (guestExclusions.length > 0) {
-      debug.log(`  Exclusions pour ces invités:`);
+      debug.log(`  Exclusions for these guests:`);
       guestExclusions.forEach(e => {
         const otherGuestId = guestsToPlace.some(g => g.id === e.guestAId) ? e.guestBId : e.guestAId;
         const otherGuest = guests.find(g => g.id === otherGuestId);
-        debug.log(`    - Ne peut pas être avec: ${otherGuest?.firstName ?? 'Inconnu'} ${otherGuest?.lastName ?? ''}`);
+        debug.log(`    - Cannot sit with: ${otherGuest?.firstName ?? 'Unknown'} ${otherGuest?.lastName ?? ''}`);
       });
     }
 
@@ -476,7 +476,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
     if (familyName && configuration.sortingCriteria.byFamily) {
       preferredTableId = familyTableMap.get(familyName);
       if (preferredTableId) {
-        debug.log(`  Famille "${guest.lastName?.trim()}" déjà sur une table, essai de regroupement...`);
+        debug.log(`  Family "${guest.lastName?.trim()}" already on a table, trying to group...`);
       }
     }
 
@@ -506,7 +506,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
           }
         }
       });
-      debug.log(`  ✓ Placé à ${suitableTable.name} (maintenant ${suitableTable.guests.length}/${suitableTable.capacity})`);
+      debug.log(`  ✓ Placed at ${suitableTable.name} (now ${suitableTable.guests.length}/${suitableTable.capacity})`);
     } else {
       // Pas de table disponible - essayer la table d'honneur en dernier recours
       const honorTable = tables.find(t => t.number === 1);
@@ -529,14 +529,14 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
             honorTable.guests.push(g);
             placedGuestIds.add(g.id);
           });
-          debug.log(`  ⚠ Placé à ${honorTable.name} (dernier recours) (maintenant ${honorTable.guests.length}/${honorTable.capacity})`);
+          debug.log(`  ⚠ Placed at ${honorTable.name} (last resort) (now ${honorTable.guests.length}/${honorTable.capacity})`);
           warnings.push({
             type: 'exclusion_violated',
             message: `${guestNames} placé(s) à la table d'honneur faute de place ailleurs.`,
             guestIds: guestsToPlace.map(g => g.id),
           });
         } else {
-          debug.log(`  ✗ ERREUR: Impossible de placer - toutes les tables pleines (exclusion avec table d'honneur)!`);
+          debug.log(`  ✗ ERROR: Cannot place - all tables full (exclusion with honor table)!`);
           warnings.push({
             type: 'exclusion_violated',
             message: `Impossible de placer ${guestNames} : toutes les tables sont pleines et exclusion avec la table d'honneur.`,
@@ -544,14 +544,14 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
           });
         }
       } else if (honorTable && honorTable.guests.length + guestsToPlace.length > honorTable.capacity) {
-        debug.log(`  ✗ ERREUR: Impossible de placer - toutes les tables pleines (table d'honneur pleine aussi)!`);
+        debug.log(`  ✗ ERROR: Cannot place - all tables full (honor table also full)!`);
         warnings.push({
           type: 'exclusion_violated',
           message: `Impossible de placer ${guestNames} : toutes les tables sont pleines, y compris la table d'honneur.`,
           guestIds: guestsToPlace.map(g => g.id),
         });
       } else {
-        debug.log(`  ✗ ERREUR: Impossible de placer - toutes les tables pleines!`);
+        debug.log(`  ✗ ERROR: Cannot place - all tables full!`);
         warnings.push({
           type: 'exclusion_violated',
           message: `Impossible de placer ${guestNames} : toutes les tables sont pleines.`,
@@ -563,7 +563,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
 
   // 8. Mélanger aléatoirement si demandé (après le tri initial)
   if (configuration.sortingCriteria.random) {
-    debug.log('\nMélange aléatoire activé');
+    debug.log('\nRandom shuffle enabled');
     tables.forEach((table) => {
       if (table.number !== 1) {
         // Ne pas mélanger la table d'honneur
@@ -573,9 +573,9 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
   }
 
   // Résumé final
-  debug.section('RÉSUMÉ FINAL');
+  debug.section('FINAL SUMMARY');
   tables.forEach(table => {
-    debug.log(`${table.name}: ${table.guests.length}/${table.capacity} personnes`);
+    debug.log(`${table.name}: ${table.guests.length}/${table.capacity} guests`);
     table.guests.forEach(g => {
       debug.log(`  - ${g.firstName} ${g.lastName ?? ''} (ID: ${g.id.substring(0, 8)}...)`);
     });
@@ -696,11 +696,11 @@ function findSuitableTableWithDebug(
     const table = tables[i];
     if (!table) continue;
 
-    debug.log(`  Essai ${table.name} (${table.guests.length}/${table.capacity}):`);
+    debug.log(`  Trying ${table.name} (${table.guests.length}/${table.capacity}):`);
 
-    // Vérifier la capacité
+    // Check capacity
     if (table.guests.length + guestsToPlace.length > seatsPerTable) {
-      debug.log(`    ✗ Table pleine`);
+      debug.log(`    ✗ Table full`);
       continue;
     }
 
@@ -712,7 +712,7 @@ function findSuitableTableWithDebug(
       for (const existingGuest of table.guests) {
         if (haveExclusion(newGuest, existingGuest, exclusions)) {
           hasExclusion = true;
-          exclusionDetails = `${newGuest.firstName} ne peut pas être avec ${existingGuest.firstName}`;
+          exclusionDetails = `${newGuest.firstName} cannot sit with ${existingGuest.firstName}`;
           break;
         }
       }
@@ -720,7 +720,7 @@ function findSuitableTableWithDebug(
     }
 
     if (!hasExclusion) {
-      debug.log(`    ✓ Table OK - pas d'exclusion`);
+      debug.log(`    ✓ Table OK - no exclusion`);
       return table;
     } else {
       debug.log(`    ✗ Exclusion: ${exclusionDetails}`);
@@ -728,14 +728,14 @@ function findSuitableTableWithDebug(
   }
 
   // Si aucune table sans exclusion n'est trouvée, on applique le mode "best effort"
-  debug.log(`  Mode "best effort" - recherche table avec place malgré exclusions...`);
+  debug.log(`  "Best effort" mode - searching for table with space despite exclusions...`);
 
   for (let i = 1; i < tables.length; i++) {
     const table = tables[i];
     if (!table) continue;
 
     if (table.guests.length + guestsToPlace.length <= seatsPerTable) {
-      debug.log(`  ⚠ ${table.name} a de la place - placement forcé avec warnings`);
+      debug.log(`  ⚠ ${table.name} has space - forced placement with warnings`);
 
       // Ajouter des warnings pour les exclusions violées
       for (const newGuest of guestsToPlace) {
@@ -776,11 +776,11 @@ function findSuitableTableWithFamilyPreference(
   if (preferredTableId) {
     const preferredTable = tables.find(t => t.id === preferredTableId);
     if (preferredTable && preferredTable.number !== 1) { // Pas la table d'honneur
-      debug.log(`  Essai table familiale ${preferredTable.name} (${preferredTable.guests.length}/${preferredTable.capacity}):`);
+      debug.log(`  Trying family table ${preferredTable.name} (${preferredTable.guests.length}/${preferredTable.capacity}):`);
 
-      // Vérifier la capacité
+      // Check capacity
       if (preferredTable.guests.length + guestsToPlace.length <= seatsPerTable) {
-        // Vérifier les exclusions
+        // Check exclusions
         let hasExclusion = false;
         let exclusionDetails = '';
 
@@ -788,7 +788,7 @@ function findSuitableTableWithFamilyPreference(
           for (const existingGuest of preferredTable.guests) {
             if (haveExclusion(newGuest, existingGuest, exclusions)) {
               hasExclusion = true;
-              exclusionDetails = `${newGuest.firstName} ne peut pas être avec ${existingGuest.firstName}`;
+              exclusionDetails = `${newGuest.firstName} cannot sit with ${existingGuest.firstName}`;
               break;
             }
           }
@@ -796,13 +796,13 @@ function findSuitableTableWithFamilyPreference(
         }
 
         if (!hasExclusion) {
-          debug.log(`    ✓ Table familiale OK - famille regroupée!`);
+          debug.log(`    ✓ Family table OK - family grouped!`);
           return preferredTable;
         } else {
-          debug.log(`    ✗ Exclusion sur table familiale: ${exclusionDetails}`);
+          debug.log(`    ✗ Exclusion on family table: ${exclusionDetails}`);
         }
       } else {
-        debug.log(`    ✗ Table familiale pleine, recherche autre table...`);
+        debug.log(`    ✗ Family table full, searching other table...`);
       }
     }
   }
