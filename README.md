@@ -1,5 +1,9 @@
 # 🎊 PlanTable
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
+
 > [!NOTE]
 > This application was originally "vibe coded" and enhanced with my limited front-end engineering knowledge.
 > A more thorough review is in progress

@@ -1,6 +1,20 @@
 {
   "name": "plantable",
   "version": "1.0.0",
+  "description": "Wedding seating chart generator with constraint management and PDF/CSV export",
+  "keywords": [
+    "wedding",
+    "seating-chart",
+    "table-planner",
+    "react",
+    "typescript"
+  ],
+  "author": "Jean-Stéphane Thibault <garry.factory@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jsthibault/PlanTable.git"
+  },
   "private": true,
   "type": "module",
   "scripts": {

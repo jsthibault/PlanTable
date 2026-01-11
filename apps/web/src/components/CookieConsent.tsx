@@ -36,11 +36,7 @@ function loadAnalytics() {
 
         // Initialize GA4
         gtag('js', new Date());
-        gtag('config', GA4_ID, {
-            'debug_mode': true // Enable debug mode to see events in DebugView
-        });
-
-        console.log('[GA4] Analytics loaded successfully with ID:', GA4_ID);
+        gtag('config', GA4_ID);
     };
 
     script.onerror = () => {

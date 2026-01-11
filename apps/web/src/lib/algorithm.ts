@@ -14,14 +14,14 @@ import type {
 // ============================================
 
 /**
- * Génère un ID unique
+ * Generates a unique ID
  */
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
 /**
- * Récupère le nom complet d'un invité
+ * Gets the full name of a guest
  */
 function getFullName(guest: Guest): string {
   return guest.lastName
@@ -30,7 +30,7 @@ function getFullName(guest: Guest): string {
 }
 
 /**
- * Vérifie si deux invités ont une exclusion entre eux
+ * Checks if two guests have an exclusion between them
  */
 function haveExclusion(
   guestA: Guest,
@@ -45,7 +45,7 @@ function haveExclusion(
 }
 
 /**
- * Récupère le partenaire d'un invité dans un couple
+ * Gets the partner of a guest in a couple
  */
 function getCouplePartner(
   guest: Guest,
@@ -71,24 +71,24 @@ interface ValidationResult {
 }
 
 /**
- * Valide si une configuration est réalisable
+ * Validates if a configuration is feasible
  */
 export function validateConfiguration(input: AlgorithmInput): ValidationResult {
   const errors: string[] = [];
   const { guests, couples, exclusions, configuration } = input;
 
-  // 1. Vérifier que le nombre total d'invités correspond
+  // 1. Check that there are guests
   if (guests.length === 0) {
-    errors.push('Aucun invité n\'a été ajouté.');
+    errors.push('No guests have been added.');
     return { isValid: false, errors };
   }
 
-  // 2. Calculer le nombre total de places disponibles
+  // 2. Calculate available seats
   const honorTableGuests = guests.filter(
     (g) => g.role === 'married' || g.role === 'witness'
   );
 
-  // Vérifier que la table d'honneur peut accueillir tous les témoins/mariés + leurs conjoints
+  // Check that the honor table can accommodate all witnesses/married + their partners
   const honorTableWithPartners = new Set<string>();
   honorTableGuests.forEach((g) => {
     honorTableWithPartners.add(g.id);
@@ -100,14 +100,14 @@ export function validateConfiguration(input: AlgorithmInput): ValidationResult {
 
   if (honorTableWithPartners.size > configuration.honorTableSeats) {
     errors.push(
-      `La table d'honneur ne peut accueillir que ${configuration.honorTableSeats} personnes, ` +
-      `mais ${honorTableWithPartners.size} personnes doivent y être placées ` +
-      `(témoins/mariés et leurs conjoints).`
+      `The honor table can only accommodate ${configuration.honorTableSeats} people, ` +
+      `but ${honorTableWithPartners.size} people need to be seated there ` +
+      `(witnesses/married and their partners).`
     );
   }
 
-  // 3. Vérifier les contraintes circulaires d'exclusion
-  // Ex: A exclut B, B exclut C, C exclut A et ils sont tous en couple
+  // 3. Check for circular exclusion constraints
+  // Ex: A excludes B, B excludes C, C excludes A and they are all in couples
   const exclusionGraph = new Map<string, Set<string>>();
 
   guests.forEach((g) => {
@@ -119,24 +119,24 @@ export function validateConfiguration(input: AlgorithmInput): ValidationResult {
     exclusionGraph.get(e.guestBId)?.add(e.guestAId);
   });
 
-  // 4. Vérifier qu'un couple n'a pas d'exclusion interne
+  // 4. Check that a couple does not have an internal exclusion
   couples.forEach((couple) => {
     if (exclusionGraph.get(couple.guestAId)?.has(couple.guestBId)) {
       const guestA = guests.find((g) => g.id === couple.guestAId);
       const guestB = guests.find((g) => g.id === couple.guestBId);
       if (guestA && guestB) {
         errors.push(
-          `Conflit : ${getFullName(guestA)} et ${getFullName(guestB)} ` +
-          `sont en couple mais ont une exclusion entre eux.`
+          `Conflict: ${getFullName(guestA)} and ${getFullName(guestB)} ` +
+          `are a couple but have an exclusion between them.`
         );
       }
     }
   });
 
-  // Note: Le nombre de tables est maintenant configuré manuellement
+  // Note: The number of tables is now manually configured
 
-  // 6. Vérifier que les groupes (couples + exclusions) peuvent tenir
-  // Un groupe lié par couple ne peut pas dépasser une table
+  // 6. Check that groups (couples + exclusions) can fit
+  // A group linked by couple cannot exceed a table
   const coupleGroups = findCoupleGroups(guests, couples);
   coupleGroups.forEach((group) => {
     const groupInHonorTable = group.some((gId) => honorTableWithPartners.has(gId));
@@ -147,11 +147,11 @@ export function validateConfiguration(input: AlgorithmInput): ValidationResult {
     if (group.length > maxCapacity) {
       const names = group.map((g) => {
         const guest = guests.find((gu) => gu.id === g);
-        return guest ? getFullName(guest) : 'Inconnu';
+        return guest ? getFullName(guest) : 'Unknown';
       }).join(', ');
       errors.push(
-        `Le groupe de couples (${names}) contient ${group.length} personnes, ` +
-        `mais la capacité maximale d'une table est de ${maxCapacity}.`
+        `The couple group (${names}) contains ${group.length} people, ` +
+        `but the maximum table capacity is ${maxCapacity}.`
       );
     }
   });
@@ -163,7 +163,7 @@ export function validateConfiguration(input: AlgorithmInput): ValidationResult {
 }
 
 /**
- * Trouve les groupes connectés par les couples
+ * Finds groups connected by couples
  */
 function findCoupleGroups(guests: Guest[], couples: Couple[]): string[][] {
   const visited = new Set<string>();
@@ -174,7 +174,7 @@ function findCoupleGroups(guests: Guest[], couples: Couple[]): string[][] {
     visited.add(guestId);
     group.push(guestId);
 
-    // Trouver les couples liés
+    // Find linked couples
     couples.forEach((couple) => {
       if (couple.guestAId === guestId && !visited.has(couple.guestBId)) {
         dfs(couple.guestBId, group);
@@ -203,7 +203,7 @@ function findCoupleGroups(guests: Guest[], couples: Couple[]): string[][] {
 // ============================================
 
 /**
- * Classe helper pour le logging de debug
+ * Helper class for debug logging
  */
 class DebugLogger {
   private logs: string[] = [];
@@ -263,7 +263,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
   }
   debug.log('Validation OK');
 
-  // 2. Créer la table d'honneur
+  // 2. Create the honor table
   debug.section('TABLE CREATION');
   const honorTable: Table = {
     id: generateId(),
@@ -275,7 +275,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
   tables.push(honorTable);
   debug.log(`Honor table created (ID: ${honorTable.id}, capacity: ${honorTable.capacity})`);
 
-  // 2b. Pré-créer les tables selon la configuration
+  // 2b. Pre-create tables according to configuration
   for (let i = 0; i < configuration.numberOfTables; i++) {
     const table = {
       id: generateId(),
@@ -288,7 +288,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
     debug.log(`Table ${i + 2} created (ID: ${table.id}, capacity: ${table.capacity})`);
   }
 
-  // 3. Identifier les invités de la table d'honneur (mariés, témoins + conjoints)
+  // 3. Identify honor table guests (married, witnesses + partners)
   debug.section('HONOR TABLE');
   const honorTableGuestIds = new Set<string>();
   const honorGuests = guests.filter(
@@ -305,7 +305,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
     }
   });
 
-  // Placer les invités de la table d'honneur
+  // Place honor table guests
   guests
     .filter((g) => honorTableGuestIds.has(g.id))
     .forEach((g) => {
@@ -318,10 +318,10 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
   let remainingGuests = guests.filter((g) => !honorTableGuestIds.has(g.id));
   debug.log(`Remaining guests to place: ${remainingGuests.length}`);
 
-  // 5. Trier selon les critères (avec exclusions en priorité, auto-générés en dernier)
+  // 5. Sort according to criteria (exclusions first, auto-generated last)
   remainingGuests = sortGuests(remainingGuests, configuration, couples, exclusions);
 
-  // Log de l'ordre de tri
+  // Log sorting order
   const guestsWithConstraints = remainingGuests.filter(g =>
     exclusions.some(e => e.guestAId === g.id || e.guestBId === g.id)
   );
@@ -336,28 +336,28 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
   debug.log(`  2. Other real guests: ${realGuests.length}`);
   debug.log(`  3. Auto-generated guests: ${autoGenerated.length}`);
 
-  // 6. Grouper par famille si le critère est actif
-  // LOGIQUE DE PLACEMENT:
-  // - Les GRANDES familles en premier (pour avoir assez de place)
-  // - Chaque famille inclut aussi les conjoints (même s'ils ont un autre nom)
-  // - Les invités auto-générés en dernier
+  // 6. Group by family if criteria is active
+  // PLACEMENT LOGIC:
+  // - LARGE families first (to have enough space)
+  // - Each family also includes partners (even if they have a different name)
+  // - Auto-generated guests last
   let orderedGuests: Guest[];
 
   if (configuration.sortingCriteria.byFamily) {
-    // Séparer les vrais invités des auto-générés
+    // Separate real guests from auto-generated
     const realGuestsAll = remainingGuests.filter(g => !isAutoGeneratedGuest(g));
     const autoGeneratedAll = remainingGuests.filter(g => isAutoGeneratedGuest(g));
 
-    // Grouper par famille les vrais invités
+    // Group real guests by family
     const familyGroups = groupByFamily(realGuestsAll);
 
-    // IMPORTANT: Trier les groupes par taille AVANT de créer les groupes étendus
-    // Cela garantit que les grandes familles gardent leurs membres
-    // (ex: pauline thibault reste avec les Thibault, pas avec le groupe de son conjoint)
+    // IMPORTANT: Sort groups by size BEFORE creating extended groups
+    // This ensures that large families keep their members
+    // (e.g., pauline thibault stays with the Thibaults, not with her partner's group)
     familyGroups.sort((a, b) => b.length - a.length);
 
-    // Étendre chaque groupe familial pour inclure les conjoints
-    // (même s'ils ont un nom de famille différent)
+    // Extend each family group to include partners
+    // (even if they have a different last name)
     const extendedFamilyGroups: Guest[][] = [];
     const processedGuestIds = new Set<string>();
 
@@ -370,7 +370,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
         extendedGroup.push(member);
         processedGuestIds.add(member.id);
 
-        // Ajouter le conjoint s'il n'est pas déjà dans le groupe
+        // Add partner if not already in the group
         const partner = getCouplePartner(member, couples, guests);
         if (partner && !processedGuestIds.has(partner.id) && !honorTableGuestIds.has(partner.id)) {
           extendedGroup.push(partner);
@@ -383,13 +383,13 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
       }
     }
 
-    // Trier les groupes par TAILLE (du plus grand au plus petit)
+    // Sort groups by SIZE (largest to smallest)
     extendedFamilyGroups.sort((groupA, groupB) => {
-      // Priorité 1 : Taille du groupe (du plus grand au plus petit)
+      // Priority 1: Group size (largest to smallest)
       const sizeDiff = groupB.length - groupA.length;
       if (sizeDiff !== 0) return sizeDiff;
 
-      // Priorité 2 : Si même taille, ceux avec exclusions en premier
+      // Priority 2: If same size, those with exclusions first
       const aHasExclusion = groupA.some(g => exclusions.some(e => e.guestAId === g.id || e.guestBId === g.id));
       const bHasExclusion = groupB.some(g => exclusions.some(e => e.guestAId === g.id || e.guestBId === g.id));
       if (aHasExclusion && !bHasExclusion) return -1;
@@ -398,7 +398,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
       return 0;
     });
 
-    // Au sein de chaque groupe, mettre les invités avec exclusions en premier
+    // Within each group, put guests with exclusions first
     const sortedFamilyGroups = extendedFamilyGroups.map(group => {
       return group.sort((a, b) => {
         const aHasExclusion = exclusions.some(e => e.guestAId === a.id || e.guestBId === a.id);
@@ -409,7 +409,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
       });
     });
 
-    // Reconstruire la liste : familles groupées (grandes d'abord) puis auto-générés
+    // Rebuild the list: grouped families (largest first) then auto-generated
     orderedGuests = [...sortedFamilyGroups.flat(), ...autoGeneratedAll];
 
     debug.log(`Extended family groups (with partners, sorted by size):`);
@@ -421,11 +421,11 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
       debug.log(`     Members: ${members}`);
     });
   } else {
-    // Sans regroupement par famille, on trie juste : vrais invités d'abord, auto-générés ensuite
+    // Without family grouping, just sort: real guests first, auto-generated after
     const realGuestsAll = remainingGuests.filter(g => !isAutoGeneratedGuest(g));
     const autoGeneratedAll = remainingGuests.filter(g => isAutoGeneratedGuest(g));
 
-    // Trier les vrais invités : ceux avec exclusions en premier
+    // Sort real guests: those with exclusions first
     realGuestsAll.sort((a, b) => {
       const aHasExclusion = exclusions.some(e => e.guestAId === a.id || e.guestBId === a.id);
       const bHasExclusion = exclusions.some(e => e.guestAId === b.id || e.guestBId === b.id);
@@ -438,17 +438,17 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
     debug.log(`No family grouping`);
   }
 
-  // 7. Placer les invités table par table
-  // LOGIQUE: Essayer de garder les familles ensemble, et les couples en priorité
+  // 7. Place guests table by table
+  // LOGIC: Try to keep families together, and couples as priority
   const placedGuestIds = new Set(honorTableGuestIds);
 
-  // Map pour tracker quelle table contient quels noms de famille
+  // Map to track which table contains which family names
   const familyTableMap = new Map<string, string>(); // familyName -> tableId
 
   for (const guest of orderedGuests) {
     if (placedGuestIds.has(guest.id)) continue;
 
-    // Trouver le partenaire s'il y en a un (TOUJOURS garder les couples ensemble)
+    // Find partner if there is one (ALWAYS keep couples together)
     const partner = getCouplePartner(guest, couples, guests);
     const guestsToPlace = partner && !placedGuestIds.has(partner.id)
       ? [guest, partner]
@@ -469,7 +469,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
       });
     }
 
-    // Chercher d'abord une table où la famille est déjà présente
+    // First look for a table where the family is already present
     const familyName = guest.lastName?.toLowerCase().trim();
     let preferredTableId: string | undefined;
 
@@ -480,7 +480,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
       }
     }
 
-    // Trouver une table appropriée (en préférant la table familiale)
+    // Find a suitable table (preferring family table)
     const suitableTable = findSuitableTableWithFamilyPreference(
       tables,
       guestsToPlace,
@@ -493,12 +493,12 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
     );
 
     if (suitableTable) {
-      // Placer les invités
+      // Place the guests
       guestsToPlace.forEach((g) => {
         suitableTable.guests.push(g);
         placedGuestIds.add(g.id);
 
-        // Enregistrer la table pour cette famille (avec trim)
+        // Register the table for this family (with trim)
         if (g.lastName && configuration.sortingCriteria.byFamily) {
           const fName = g.lastName.toLowerCase().trim();
           if (!familyTableMap.has(fName)) {
@@ -508,12 +508,12 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
       });
       debug.log(`  ✓ Placed at ${suitableTable.name} (now ${suitableTable.guests.length}/${suitableTable.capacity})`);
     } else {
-      // Pas de table disponible - essayer la table d'honneur en dernier recours
+      // No table available - try honor table as last resort
       const honorTable = tables.find(t => t.number === 1);
-      const guestNames = guestsToPlace.map(g => getFullName(g)).join(' et ');
+      const guestNames = guestsToPlace.map(g => getFullName(g)).join(' and ');
 
       if (honorTable && honorTable.guests.length + guestsToPlace.length <= honorTable.capacity) {
-        // Vérifier qu'il n'y a pas d'exclusion avec la table d'honneur
+        // Check there's no exclusion with the honor table
         const hasExclusionWithHonorTable = guestsToPlace.some(guestToPlace => {
           return exclusions.some(exc => {
             const isGuestInExclusion = exc.guestAId === guestToPlace.id || exc.guestBId === guestToPlace.id;
@@ -524,7 +524,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
         });
 
         if (!hasExclusionWithHonorTable) {
-          // Placer sur la table d'honneur
+          // Place on honor table
           guestsToPlace.forEach((g) => {
             honorTable.guests.push(g);
             placedGuestIds.add(g.id);
@@ -532,14 +532,14 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
           debug.log(`  ⚠ Placed at ${honorTable.name} (last resort) (now ${honorTable.guests.length}/${honorTable.capacity})`);
           warnings.push({
             type: 'exclusion_violated',
-            message: `${guestNames} placé(s) à la table d'honneur faute de place ailleurs.`,
+            message: `${guestNames} placed at honor table due to lack of space elsewhere.`,
             guestIds: guestsToPlace.map(g => g.id),
           });
         } else {
           debug.log(`  ✗ ERROR: Cannot place - all tables full (exclusion with honor table)!`);
           warnings.push({
             type: 'exclusion_violated',
-            message: `Impossible de placer ${guestNames} : toutes les tables sont pleines et exclusion avec la table d'honneur.`,
+            message: `Cannot place ${guestNames}: all tables are full and exclusion with honor table.`,
             guestIds: guestsToPlace.map(g => g.id),
           });
         }
@@ -547,32 +547,32 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
         debug.log(`  ✗ ERROR: Cannot place - all tables full (honor table also full)!`);
         warnings.push({
           type: 'exclusion_violated',
-          message: `Impossible de placer ${guestNames} : toutes les tables sont pleines, y compris la table d'honneur.`,
+          message: `Cannot place ${guestNames}: all tables are full, including honor table.`,
           guestIds: guestsToPlace.map(g => g.id),
         });
       } else {
         debug.log(`  ✗ ERROR: Cannot place - all tables full!`);
         warnings.push({
           type: 'exclusion_violated',
-          message: `Impossible de placer ${guestNames} : toutes les tables sont pleines.`,
+          message: `Cannot place ${guestNames}: all tables are full.`,
           guestIds: guestsToPlace.map(g => g.id),
         });
       }
     }
   }
 
-  // 8. Mélanger aléatoirement si demandé (après le tri initial)
+  // 8. Shuffle randomly if requested (after initial sort)
   if (configuration.sortingCriteria.random) {
     debug.log('\nRandom shuffle enabled');
     tables.forEach((table) => {
       if (table.number !== 1) {
-        // Ne pas mélanger la table d'honneur
+        // Don't shuffle the honor table
         shuffleArray(table.guests);
       }
     });
   }
 
-  // Résumé final
+  // Final summary
   debug.section('FINAL SUMMARY');
   tables.forEach(table => {
     debug.log(`${table.name}: ${table.guests.length}/${table.capacity} guests`);
@@ -598,7 +598,7 @@ export function generateSeatingPlan(input: AlgorithmInput): SeatingPlanResult {
 }
 
 /**
- * Vérifie si un invité est auto-généré (pattern "Invité X" ou "Guest X")
+ * Checks if a guest is auto-generated (pattern "Invité X" or "Guest X")
  */
 export function isAutoGeneratedGuest(guest: Guest): boolean {
   const name = `${guest.firstName} ${guest.lastName ?? ''}`.trim();
@@ -606,8 +606,8 @@ export function isAutoGeneratedGuest(guest: Guest): boolean {
 }
 
 /**
- * Trie les invités selon les critères configurés
- * PRIORITÉ : Invités avec contraintes > Invités réels > Invités auto-générés
+ * Sorts guests according to configured criteria
+ * PRIORITY: Guests with constraints > Real guests > Auto-generated guests
  */
 function sortGuests(
   guests: Guest[],
@@ -617,41 +617,41 @@ function sortGuests(
 ): Guest[] {
   const sorted = [...guests];
 
-  // Créer un set des IDs d'invités avec exclusions pour lookup rapide
+  // Create a set of guest IDs with exclusions for fast lookup
   const guestsWithExclusions = new Set<string>();
   exclusions.forEach(e => {
     guestsWithExclusions.add(e.guestAId);
     guestsWithExclusions.add(e.guestBId);
   });
 
-  // Ordre de priorité : Contraintes > Vrais invités > Auto-générés > Rôle > Famille > Âge
+  // Priority order: Constraints > Real guests > Auto-generated > Role > Family > Age
   sorted.sort((a, b) => {
-    // 0. PRIORITÉ MAXIMALE : Invités avec exclusions en premier
+    // 0. TOP PRIORITY: Guests with exclusions first
     const aHasExclusion = guestsWithExclusions.has(a.id);
     const bHasExclusion = guestsWithExclusions.has(b.id);
     if (aHasExclusion && !bHasExclusion) return -1;
     if (!aHasExclusion && bHasExclusion) return 1;
 
-    // 1. Invités auto-générés en DERNIER (ils peuvent aller n'importe où)
+    // 1. Auto-generated guests LAST (they can go anywhere)
     const aIsAuto = isAutoGeneratedGuest(a);
     const bIsAuto = isAutoGeneratedGuest(b);
     if (aIsAuto && !bIsAuto) return 1;  // a après b
     if (!aIsAuto && bIsAuto) return -1; // a avant b
 
-    // 2. Par rôle (témoins en premier - mais ils sont déjà à la table d'honneur)
+    // 2. By role (witnesses first - but they are already at the honor table)
     if (config.sortingCriteria.byRole) {
       const roleOrder: Record<string, number> = { married: 0, witness: 1, bridesmaid: 2, groomsman: 2, regular: 3 };
       const roleCompare = (roleOrder[a.role] ?? 3) - (roleOrder[b.role] ?? 3);
       if (roleCompare !== 0) return roleCompare;
     }
 
-    // 3. Par famille (case-insensitive, trimmed)
+    // 3. By family (case-insensitive, trimmed)
     if (config.sortingCriteria.byFamily && a.lastName && b.lastName) {
       const familyCompare = a.lastName.toLowerCase().trim().localeCompare(b.lastName.toLowerCase().trim());
       if (familyCompare !== 0) return familyCompare;
     }
 
-    // 4. Par âge (grouper les âges similaires)
+    // 4. By age (group similar ages)
     if (config.sortingCriteria.byAge && a.age !== undefined && b.age !== undefined) {
       return a.age - b.age;
     }
@@ -663,13 +663,13 @@ function sortGuests(
 }
 
 /**
- * Groupe les invités par famille (nom de famille, case-insensitive, trimmed)
+ * Groups guests by family (last name, case-insensitive, trimmed)
  */
 function groupByFamily(guests: Guest[]): Guest[][] {
   const familyMap = new Map<string, Guest[]>();
 
   guests.forEach((guest) => {
-    // Normaliser en minuscules ET trimmer pour éviter les espaces parasites
+    // Normalize to lowercase AND trim to avoid stray spaces
     const familyKey = guest.lastName?.toLowerCase().trim() || '_no_family_';
     const family = familyMap.get(familyKey) ?? [];
     family.push(guest);
@@ -680,7 +680,7 @@ function groupByFamily(guests: Guest[]): Guest[][] {
 }
 
 /**
- * Trouve une table appropriée pour un groupe d'invités (avec debug)
+ * Finds a suitable table for a group of guests (with debug)
  */
 function findSuitableTableWithDebug(
   tables: Table[],
@@ -691,7 +691,7 @@ function findSuitableTableWithDebug(
   _allGuests: Guest[],
   debug: DebugLogger
 ): Table | null {
-  // Ignorer la table d'honneur (index 0)
+  // Skip honor table (index 0)
   for (let i = 1; i < tables.length; i++) {
     const table = tables[i];
     if (!table) continue;
@@ -704,7 +704,7 @@ function findSuitableTableWithDebug(
       continue;
     }
 
-    // Vérifier les exclusions
+    // Check exclusions
     let hasExclusion = false;
     let exclusionDetails = '';
 
@@ -727,7 +727,7 @@ function findSuitableTableWithDebug(
     }
   }
 
-  // Si aucune table sans exclusion n'est trouvée, on applique le mode "best effort"
+  // If no table without exclusion is found, apply "best effort" mode
   debug.log(`  "Best effort" mode - searching for table with space despite exclusions...`);
 
   for (let i = 1; i < tables.length; i++) {
@@ -737,11 +737,11 @@ function findSuitableTableWithDebug(
     if (table.guests.length + guestsToPlace.length <= seatsPerTable) {
       debug.log(`  ⚠ ${table.name} has space - forced placement with warnings`);
 
-      // Ajouter des warnings pour les exclusions violées
+      // Add warnings for violated exclusions
       for (const newGuest of guestsToPlace) {
         for (const existingGuest of table.guests) {
           if (haveExclusion(newGuest, existingGuest, exclusions)) {
-            const message = `${getFullName(newGuest)} et ${getFullName(existingGuest)} sont à la même table malgré l'exclusion.`;
+            const message = `${getFullName(newGuest)} and ${getFullName(existingGuest)} are at the same table despite exclusion.`;
             debug.log(`    ⚠ WARNING: ${message}`);
             warnings.push({
               type: 'exclusion_violated',
@@ -759,8 +759,8 @@ function findSuitableTableWithDebug(
 }
 
 /**
- * Trouve une table appropriée avec préférence pour la table familiale
- * Essaie d'abord la table où la famille est déjà présente
+ * Finds a suitable table with preference for family table
+ * Tries first the table where the family is already present
  */
 function findSuitableTableWithFamilyPreference(
   tables: Table[],
@@ -772,10 +772,10 @@ function findSuitableTableWithFamilyPreference(
   debug: DebugLogger,
   preferredTableId?: string
 ): Table | null {
-  // Si on a une table préférée (famille déjà présente), essayer d'abord celle-là
+  // If we have a preferred table (family already present), try that first
   if (preferredTableId) {
     const preferredTable = tables.find(t => t.id === preferredTableId);
-    if (preferredTable && preferredTable.number !== 1) { // Pas la table d'honneur
+    if (preferredTable && preferredTable.number !== 1) { // Not the honor table
       debug.log(`  Trying family table ${preferredTable.name} (${preferredTable.guests.length}/${preferredTable.capacity}):`);
 
       // Check capacity
@@ -807,12 +807,12 @@ function findSuitableTableWithFamilyPreference(
     }
   }
 
-  // Sinon, utiliser la logique standard
+  // Otherwise, use standard logic
   return findSuitableTableWithDebug(tables, guestsToPlace, exclusions, seatsPerTable, warnings, allGuests, debug);
 }
 
 /**
- * Mélange un tableau aléatoirement (Fisher-Yates)
+ * Shuffles an array randomly (Fisher-Yates)
  */
 function shuffleArray<T>(array: T[]): void {
   for (let i = array.length - 1; i > 0; i--) {
@@ -826,18 +826,18 @@ function shuffleArray<T>(array: T[]): void {
 // ============================================
 
 /**
- * Génère le contenu CSV pour l'export
+ * Generates CSV content for export
  */
 export function generateCSV(tables: Table[]): string {
-  const headers = ['Numéro Table', 'Nom Table', 'Invité', 'Rôle', 'Famille'];
+  const headers = ['Table Number', 'Table Name', 'Guest', 'Role', 'Family'];
   const rows: string[] = [headers.join(',')];
 
   tables.forEach((table) => {
     table.guests.forEach((guest) => {
       const roleLabels: Record<string, string> = {
-        married: 'Marié(e)',
-        witness: 'Témoin',
-        regular: 'Invité',
+        married: 'Married',
+        witness: 'Witness',
+        regular: 'Guest',
       };
 
       rows.push(
@@ -845,7 +845,7 @@ export function generateCSV(tables: Table[]): string {
           table.number.toString(),
           `"${table.name}"`,
           `"${getFullName(guest)}"`,
-          roleLabels[guest.role] ?? 'Invité',
+          roleLabels[guest.role] ?? 'Guest',
           guest.lastName ? `"${guest.lastName}"` : '',
         ].join(',')
       );
@@ -856,7 +856,7 @@ export function generateCSV(tables: Table[]): string {
 }
 
 /**
- * Télécharge un fichier
+ * Downloads a file
  */
 export function downloadFile(content: string, filename: string, mimeType: string): void {
   const blob = new Blob([content], { type: mimeType });
